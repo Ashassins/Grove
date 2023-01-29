@@ -66,8 +66,11 @@
     <br>
 </div>
 
-<script>
+<script src="/store.js">
     import { page } from '$app/stores';
+    import { onMount } from "svelte";
+    // import { apiData, groveNames } from '/store.js';
+    
     const treeID = parseInt($page.url.searchParams.get('treeID'), 10);
 
     let trees = [
@@ -82,6 +85,19 @@
         { dateTime: 1674939696, content: "Something Funny", status: "active" },
         { dateTime: 1674939696, content: "Whatcha Doing?", status: "inactive" },
     ]
+
+    onMount(async() => {
+        fetch("http://localhost:8000/users/list/").then(response => response.json())
+        .then(data => {
+            console.log("huzzah");
+            console.log(data);
+            apiData.set(data);
+            // trees = data;
+        }).catch(error => {
+            console.log(error);
+            return [];
+        });
+    });
 
     function dispQuests() {
         return quests.filter(function (el)
