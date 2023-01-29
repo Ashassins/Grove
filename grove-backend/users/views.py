@@ -1,14 +1,17 @@
 from django.http import HttpRequest, Http404
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import User
 from groves.models import Grove
+from notifications.models import Notification
 from .serializers import UserSerializer
 from django.db.models import Q
 
 
 @api_view(["GET"])
 def list_users(request):
+    print(request)
     users = User.objects.all()
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
@@ -16,7 +19,7 @@ def list_users(request):
 
 @api_view(["GET"])
 def list_users_groves(request):
-    username = request.query_params["username"]
+    username = request.user
     if username is None:
         raise Http404
     uid = User.objects.filter(username=username)
@@ -33,3 +36,16 @@ def list_users_groves(request):
             friends.append(pair.user_a)
     
     return Response(UserSerializer(friends, many=True).data)
+
+@api_view(["POST"])
+def get_notifications(request):
+    username = request.user
+    user = User.objects.find(username=username)
+    print(user) 
+    notif = Notification.objects.filter(user_to=user)
+    print(notif)
+
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def poke_friend(request):
+    pass
